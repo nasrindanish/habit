@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Habit Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .date-display {
+            text-align: center;
+            font-size: 1.2em;
+            color: #4a5568;
+            margin-bottom: 30px;
+            padding: 10px;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            border-radius: 15px;
+            font-weight: 500;
+        }
+
+        .add-habit-section {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .habit-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+
+        .habit-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .add-btn {
+            padding: 15px 25px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .habits-container {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .habit-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            padding: 25px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .habit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .habit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .habit-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .habit-card.completed {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        }
+
+        .habit-name {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .habit-emoji {
+            font-size: 1.5em;
+        }
+
+        .habit-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .streak {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .habit-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .complete-btn, .delete-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .complete-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2d3748;
+        }
+
+        .complete-btn:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+
+        .delete-btn {
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #ff6b6b;
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #4a5568;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            color: #2d3748;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            .add-habit-section {
+                flex-direction: column;
+            }
+            
+            .habits-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 Daily Habit Tracker</h1>
+        
+        <div class="date-display" id="dateDisplay"></div>
+        
+        <div class="stats-summary" id="statsSection">
+            <div class="stat-card">
+                <span class="stat-number" id="totalHabits">0</span>
+                <span class="stat-label">Total Habits</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="completedToday">0</span>
+                <span class="stat-label">Completed Today</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="streakCount">0</span>
+                <span class="stat-label">Best Streak</span>
+            </div>
+        </div>
+
+        <div class="add-habit-section">
+            <input type="text" class="habit-input" id="habitInput" placeholder="Enter a new habit..." maxlength="50">
+            <button class="add-btn" onclick="addHabit()">Add Habit</button>
+        </div>
+
+        <div class="habits-container" id="habitsContainer">
+            <div class="empty-state">
+                <h3>No habits yet!</h3>
+                <p>Add your first habit above to get started on your journey! 🚀</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let habits = [];
+        const colors = [
+            'linear-gradient(135deg, #667eea, #764ba2)',
+            'linear-gradient(135deg, #f093fb, #f5576c)',
+            'linear-gradient(135deg, #4facfe, #00f2fe)',
+            'linear-gradient(135deg, #43e97b, #38f9d7)',
+            'linear-gradient(135deg, #fa709a, #fee140)',
+            'linear-gradient(135deg, #a8edea, #fed6e3)',
+            'linear-gradient(135deg, #ff9a9e, #fecfef)',
+            'linear-gradient(135deg, #a18cd1, #fbc2eb)'
+        ];
+
+        const emojis = ['🏃', '📚', '💧', '🧘', '🍎', '💪', '🎯', '🌱', '✍️', '🎵', '🧹', '💻'];
+
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        function getRandomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function getRandomEmoji() {
+            return emojis[Math.floor(Math.random() * emojis.length)];
+        }
+
+        function addHabit() {
+            const input = document.getElementById('habitInput');
+            const habitName = input.value.trim();
+            
+            if (habitName === '') return;
+
+            const habit = {
+                id: Date.now(),
+                name: habitName,
+                emoji: getRandomEmoji(),
+                color: getRandomColor(),
+                completed: false,
+                streak: 0,
+                totalCompleted: 0,
+                createdDate: new Date().toDateString()
+            };
+
+            habits.push(habit);
+            input.value = '';
+            renderHabits();
+            updateStats();
+        }
+
+        function toggleHabit(id) {
+            const habit = habits.find(h => h.id === id);
+            if (habit) {
+                habit.completed = !habit.completed;
+                if (habit.completed) {
+                    habit.streak++;
+                    habit.totalCompleted++;
+                } else {
+                    habit.streak = Math.max(0, habit.streak - 1);
+                    habit.totalCompleted = Math.max(0, habit.totalCompleted - 1);
+                }
+                renderHabits();
+                updateStats();
+            }
+        }
+
+        function deleteHabit(id) {
+            habits = habits.filter(h => h.id !== id);
+            renderHabits();
+            updateStats();
+        }
+
+        function renderHabits() {
+            const container = document.getElementById('habitsContainer');
+            
+            if (habits.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No habits yet!</h3>
+                        <p>Add your first habit above to get started on your journey! 🚀</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = habits.map(habit => {
+                const progress = Math.min((habit.totalCompleted / 30) * 100, 100);
+                return `
+                    <div class="habit-card ${habit.completed ? 'completed' : ''}" style="background: ${habit.color}">
+                        <div class="habit-name">
+                            <span class="habit-emoji">${habit.emoji}</span>
+                            ${habit.name}
+                        </div>
+                        <div class="habit-stats">
+                            <span>Total: ${habit.totalCompleted}</span>
+                            <span class="streak">🔥 ${habit.streak} day streak</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                        <div class="habit-actions">
+                            <button class="complete-btn" onclick="toggleHabit(${habit.id})">
+                                ${habit.completed ? '✓ Done' : 'Mark Done'}
+                            </button>
+                            <button class="delete-btn" onclick="deleteHabit(${habit.id})">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const totalHabits = habits.length;
+            const completedToday = habits.filter(h => h.completed).length;
+            const bestStreak = habits.length > 0 ? Math.max(...habits.map(h => h.streak)) : 0;
+
+            document.getElementById('totalHabits').textContent = totalHabits;
+            document.getElementById('completedToday').textContent = completedToday;
+            document.getElementById('streakCount').textContent = bestStreak;
+        }
+
+        // Event listener for Enter key
+        document.getElementById('habitInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addHabit();
+            }
+        });
+
+        // Initialize
+        updateDate();
+        renderHabits();
+        updateStats();
+    </script>
+</body>
+</html>
